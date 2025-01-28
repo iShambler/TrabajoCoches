@@ -13,6 +13,7 @@ class Coche extends Model
         'marca',
         'modelo',
         'precio',
+        'color',
         'imagen'
     ];
 }

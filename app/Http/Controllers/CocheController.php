@@ -4,17 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Coche;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CocheController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $coches = Coche::all();
+        $query = Coche::query();
+    
+        if ($request->filled('marca')) {
+            $query->where('marca', 'like', '%' . $request->marca . '%');
+        }
+    
+        $coches = $query->get();
+    
         return view('index', compact('coches'));
     }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -34,16 +43,22 @@ class CocheController extends Controller
             'modelo' => 'required',
             'precio' => 'required|numeric',
             'color' => 'required',
+        
         ]);
-        $coche = new Coche();
-        $coche->marca = $request->marca;
-        $coche->modelo = $request->modelo;
-        $coche->precio = $request->precio;
-        $coche->color = $request->color;
+    
+        $coche = new Coche($request->except('imagen'));
+    
+        if ($request->hasFile('imagen')) {
+            $imagenPath = $request->file('imagen')->store('coches', 'public');
+            $coche->imagen = $imagenPath;
+        }
+    
         $coche->save();
-        return redirect()->route('coches.index')->with('success', 'Coche creado con exito');
-
+    
+        return redirect()->route('coches.index')->with('success', 'Coche creado exitosamente');
     }
+    
+    
 
     /**
      * Display the specified resource.
@@ -64,19 +79,32 @@ class CocheController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Coche $coche)
     {
-
         $request->validate([
             'marca' => 'required',
             'modelo' => 'required',
             'precio' => 'required|numeric',
             'color' => 'required',
+            'imagen' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
-   $coche = Coche::findOrFail($id);
-        $coche->update($request->all());
-        return redirect()->route('coches.index')->with('success', 'Coche actualizado con exito');
+    
+        $coche->fill($request->except('imagen'));
+    
+        if ($request->hasFile('imagen')) {
+            // Eliminar la imagen anterior si existe
+            if ($coche->imagen) {
+                Storage::disk('public')->delete($coche->imagen);
+            }
+            $imagenPath = $request->file('imagen')->store('coches', 'public');
+            $coche->imagen = $imagenPath;
+        }
+    
+        $coche->save();
+    
+        return redirect()->route('coches.index');
     }
+    
 
     /**
      * Remove the specified resource from storage.
