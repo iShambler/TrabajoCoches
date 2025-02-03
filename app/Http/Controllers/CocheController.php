@@ -21,7 +21,13 @@ class CocheController extends Controller
     
         $coches = $query->get();
     
-        return view('index', compact('coches'));
+        // Verificar si no se encuentran coches
+        $mensaje = null;
+        if ($coches->isEmpty()) {
+            $mensaje = 'No se encuentra ese coche.';
+        }
+    
+        return view('index', compact('coches', 'mensaje'));
     }
     
 

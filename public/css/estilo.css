@@ -25,8 +25,8 @@ h1 {
 
 /* Estilo para cada coche */
 .car-item {
-    flex-basis: calc(25% - 15px); /* 4 columnas en pantallas grandes */
-    max-width: calc(25% - 15px);
+    flex-basis: calc(20% - 15px); /* 4 columnas en pantallas grandes */
+    max-width: calc(20% - 15px);
     display: flex;
     flex-direction: column;
     background-color: #fff;
